@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Notification Service
+  description: Sends notifications for the K11 platform. Consumes user-service for contact info.
+  version: 1.0.0
+paths:
+  /api/v1/notifications:
+    post:
+      summary: Send a notification to a user
+      operationId: send_notification
+      tags: [notifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendNotification'
+      responses:
+        '201':
+          description: Notification sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '422':
+          description: User contact info not found
+  /api/v1/notifications/{id}:
+    get:
+      summary: Get a notification by ID
+      operationId: get_notification
+      tags: [notifications]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '404':
+          description: Notification not found
+components:
+  schemas:
+    Notification:
+      type: object
+      required: [id, user_id, channel, message, status]
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+          description: Contact info fetched via user-service GET /api/v2/users/{id}/contact
+        channel:
+          type: string
+          enum: [email, sms, push]
+        message:
+          type: string
+        status:
+          type: string
+          enum: [sent, failed, pending]
+    SendNotification:
+      type: object
+      required: [user_id, channel, message]
+      properties:
+        user_id:
+          type: string
+        channel:
+          type: string
+          enum: [email, sms, push]
+        message:
+          type: string
